@@ -1,4 +1,4 @@
-FROM ubuntu:24.0
+FROM ubuntu:latest
 COPY app.py /app.py
 RUN pip install flask
 CMD ["app.py"]
