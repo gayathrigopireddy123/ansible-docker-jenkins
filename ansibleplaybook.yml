@@ -1,0 +1,47 @@
+---
+- name: Deploy Dockerized App from GitHub
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install Git
+      apt:
+        name: git
+        state: present
+        update_cache: yes
+
+    - name: Install Docker using official script
+      shell: |
+        curl -fsSL https://get.docker.com -o get-docker.sh
+        sh get-docker.sh
+      args:
+        executable: /bin/bash
+
+    - name: Start and enable Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Clone the GitHub repository
+      git:
+        repo: https://github.com/gayathrigopireddy123/ansible-docker-jenkins.git
+        dest: /home/ubuntu/ansible-docker-jenkins
+        version: master
+        force: yes
+
+    - name: Build Docker image
+      community.docker.docker_image:
+        name: myapp
+        build:
+          path: /home/ubuntu/ansible-docker-jenkins
+        source: build
+
+    - name: Run Docker container
+      community.docker.docker_container:
+        name: myapp-container
+        image: myapp
+        state: started
+        ports:
+          - "5000:5000"
+
